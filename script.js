@@ -27,7 +27,7 @@ var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical M
 var position       = new OpenLayers.LonLat(lon, lat).transform( fromProjection, toProjection);
 
 map = new OpenLayers.Map("Map");
-var mapnik         = new OpenLayers.Layer.OSM();
+var mapnik = new OpenLayers.Layer.OSM();
 map.addLayer(mapnik);
 
 var markers = new OpenLayers.Layer.Markers( "Markers" );
@@ -56,10 +56,10 @@ var unknownicon = new OpenLayers.Icon("https://www.downloadclipart.net/large/180
 var iconmap = {
   "Long-distance" : ldicon,
   "Cargo" : ficon,
-  "Locomotive" : licon, // Not seen yet
+  "Locomotive" : licon,
   "Shunting" : sicon,
   "Commuter" : cicon,
-  "On-track machines" : otmicon // Not seen yet
+  "On-track machines" : otmicon
 };
 
 // Get the trains and map number : type
@@ -79,7 +79,7 @@ $.getJSON( vrdaytrainsAPI)
 loclist = [];
 
 // Test marker on camera position. TODO remove
-markers.addMarker(new OpenLayers.Marker(position, ldicon));
+//markers.addMarker(new OpenLayers.Marker(position, ldicon));
 
 map.setCenter(position, zoom);
 
@@ -93,41 +93,41 @@ function showAllMarkers() {
 }
 
 function showMarkers(showAll) {
-    console.log(loclist.length)
-    $.getJSON( vrlocAPI)
+  console.log(loclist.length)
+  $.getJSON( vrlocAPI)
   .done(function( data ) {
     $.each( data.features, function( i, item ) {
-        tnumber = item.properties.trainNumber;
-        let show = false;
-        let ftrain = false;
-        if (trainTypes[item.properties.trainNumber] === "Cargo") {
-          ftrain = true;
-        }
-        if (ftrain) {
-            console.log("that's freight");
-            show = true;
-            ftrain = true;
-        } else if (showAll) {
-            show = true;
-        }
-        if (show) {
-            
-      $('#locations').prepend(item.properties.trainNumber + " at " + item.geometry.coordinates + ", ");
-      // TODO replace with dictionary of train locations
-      loclist.push(item.geometry.coordinates);
-      console.log(loclist.length)
-      var strentry = item.geometry.coordinates + ""
-      elon = strentry.split(",")[0];
-      elat = strentry.split(",")[1];
-      console.log("Adding marker " + tnumber + " " + elon + ", " + elat)
-      let useicon = unknownicon;
-      if (tnumber in trainTypes) {
-        useicon = iconmap[trainTypes[tnumber]];
-      } else {
-        console.log("Train number " + tnumber + " did not have a registered type");
+      tnumber = item.properties.trainNumber;
+      let show = false;
+      let ftrain = false;
+      if (trainTypes[item.properties.trainNumber] === "Cargo") {
+        ftrain = true;
       }
-      markers.addMarker(new OpenLayers.Marker( new OpenLayers.LonLat(parseFloat(elon), parseFloat(elat)).transform( fromProjection, toProjection), useicon.clone()))
+      if (ftrain) {
+          console.log("that's freight");
+          show = true;
+          ftrain = true;
+      } else if (showAll) {
+          show = true;
+      }
+      if (show) {
+          
+        $('#locations').prepend(item.properties.trainNumber + " at " + item.geometry.coordinates + ", ");
+        // TODO replace with dictionary of train locations
+        loclist.push(item.geometry.coordinates);
+        console.log(loclist.length)
+        var strentry = item.geometry.coordinates + ""
+        elon = strentry.split(",")[0];
+        elat = strentry.split(",")[1];
+        console.log("Adding marker " + tnumber + " " + elon + ", " + elat)
+        let useicon = unknownicon;
+        if (tnumber in trainTypes) {
+          useicon = iconmap[trainTypes[tnumber]];
+        } else {
+          console.log("Train number " + tnumber + " did not have a registered type");
         }
+        markers.addMarker(new OpenLayers.Marker( new OpenLayers.LonLat(parseFloat(elon), parseFloat(elat)).transform( fromProjection, toProjection), useicon.clone()))
+      }
     });
   });
 }
